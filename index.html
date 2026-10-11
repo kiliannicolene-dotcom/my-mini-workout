@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#d9efeb" />
+  <meta name="description" content="A gentle, simple workout generator for the time and level you have today." />
+  <title>My Mini Workout</title>
+  <style>
+    :root {
+      --ink: #273c39;
+      --muted: #71807b;
+      --teal: #4d9c91;
+      --teal-dark: #347d73;
+      --teal-soft: #e3f2ef;
+      --beige: #f6f1e7;
+      --cream: #fbfaf7;
+      --line: #e7e9e3;
+      --white: #fff;
+      --shadow: 0 16px 42px rgba(41, 69, 62, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(ellipse at 10% 0%, #e8f4f0 0, transparent 33rem), var(--cream);
+      font-family: ui-rounded, "Avenir Next", Avenir, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .shell { width: min(100% - 32px, 980px); margin: 0 auto; padding: 30px 0 48px; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -.035em; font-size: 1.02rem; }
+    .brand-mark { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 14px; background: var(--teal-soft); color: var(--teal-dark); }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .tiny-note { color: var(--muted); font-size: .83rem; }
+    .hero { text-align: center; max-width: 590px; margin: 0 auto 26px; }
+    .eyebrow { display: inline-flex; gap: 7px; align-items: center; color: var(--teal-dark); background: var(--teal-soft); padding: 6px 12px; border-radius: 999px; font-size: .75rem; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+    h1 { margin: 14px 0 7px; font-size: clamp(2.2rem, 8vw, 3.55rem); letter-spacing: -.065em; line-height: 1; }
+    .hero p { color: var(--muted); margin: 12px auto 0; font-size: 1.02rem; max-width: 450px; }
+    .panel { background: rgba(255,255,255,.88); border: 1px solid rgba(231,233,227,.9); border-radius: 24px; box-shadow: var(--shadow); }
+    .setup { padding: clamp(18px, 4vw, 28px); }
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .field-label { display: block; margin: 0 0 10px; font-size: .82rem; font-weight: 750; }
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--beige); padding: 4px; border-radius: 14px; gap: 3px; }
+    .segmented button { cursor: pointer; border: 0; background: transparent; padding: 10px 6px; border-radius: 11px; color: #67736f; font-size: .9rem; font-weight: 650; transition: .18s ease; }
+    .segmented button[aria-pressed="true"] { background: var(--white); color: var(--teal-dark); box-shadow: 0 2px 8px rgba(45,65,59,.09); }
+    .generate { display: flex; justify-content: center; align-items: center; gap: 9px; width: 100%; margin-top: 23px; border: 0; border-radius: 15px; padding: 15px 20px; color: white; background: var(--teal-dark); font-weight: 760; cursor: pointer; box-shadow: 0 8px 18px rgba(52,125,115,.22); transition: transform .15s, background .15s; }
+    .generate:hover { background: #286d64; transform: translateY(-1px); }
+    .generate:active { transform: translateY(0); }
+    button:focus-visible, input:focus-visible + .checkmark { outline: 3px solid #a8d8d0; outline-offset: 3px; }
+    .workout { margin-top: 22px; padding: clamp(18px, 4vw, 28px); }
+    .workout-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 19px; }
+    .workout-head h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.035em; }
+    .workout-head p { color: var(--muted); font-size: .88rem; margin: 5px 0 0; }
+    .time-badge { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; background: var(--beige); padding: 8px 11px; border-radius: 999px; font-size: .8rem; font-weight: 720; }
+    .progress-wrap { margin-bottom: 18px; }
+    .progress-copy { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .78rem; margin-bottom: 7px; }
+    .progress-track { height: 7px; border-radius: 8px; overflow: hidden; background: #edf0ec; }
+    .progress-fill { height: 100%; width: 0; background: var(--teal); border-radius: inherit; transition: width .25s ease; }
+    .exercise-list { display: grid; gap: 10px; }
+    .exercise { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 13px; align-items: center; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; background: white; transition: .2s ease; }
+    .exercise.done { background: #f5faf8; border-color: #cfe5df; }
+    .exercise.done .exercise-name { color: #71807b; text-decoration: line-through; text-decoration-color: #94b8af; }
+    .check { position: relative; display: inline-grid; place-items: center; width: 23px; height: 23px; cursor: pointer; }
+    .check input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .checkmark { display: grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid #c9d2cd; border-radius: 7px; background: white; color: transparent; transition: .15s; }
+    .check input:checked + .checkmark { background: var(--teal); border-color: var(--teal); color: white; }
+    .checkmark svg { width: 14px; height: 14px; }
+    .exercise-main { min-width: 0; }
+    .exercise-name { display: block; font-size: .94rem; font-weight: 740; transition: color .2s; }
+    .exercise-note { display: block; color: var(--muted); font-size: .76rem; margin-top: 2px; }
+    .exercise-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; white-space: nowrap; }
+    .dose { color: var(--teal-dark); font-weight: 760; font-size: .8rem; }
+    .rest { color: var(--muted); font-size: .73rem; }
+    .finish { display: none; margin-top: 17px; padding: 13px 15px; border-radius: 14px; color: var(--teal-dark); background: var(--teal-soft); font-size: .9rem; font-weight: 650; text-align: center; }
+    .finish.show { display: block; }
+    footer { text-align: center; color: #85918c; font-size: .76rem; margin: 18px 0 0; }
+    @media (max-width: 580px) {
+      .shell { width: min(100% - 22px, 520px); padding: 18px 0 30px; }
+      header { margin-bottom: 23px; }
+      .tiny-note { font-size: .73rem; }
+      .hero { margin-bottom: 21px; }
+      .setup-grid { grid-template-columns: 1fr; gap: 17px; }
+      .segmented button { padding: 11px 5px; }
+      .workout { margin-top: 15px; }
+      .exercise { grid-template-columns: 23px minmax(0,1fr); gap: 10px; padding: 12px; }
+      .exercise-meta { grid-column: 2; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; margin-top: -3px; }
+      .exercise-note { font-size: .73rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h3m10 0h3M7 9v6m10-6v6M9 12h6M5 9v6m14-6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>My Mini Workout</div>
+      <span class="tiny-note">A little movement, just for you 🌿</span>
+    </header>
+
+    <section class="hero" aria-labelledby="title">
+      <span class="eyebrow"><span aria-hidden="true">✦</span> Your feel-good fitness break</span>
+      <h1 id="title">Move at your pace.</h1>
+      <p>Choose the time you have and the level that feels right today. Your mini workout is ready in a tap.</p>
+    </section>
+
+    <section class="panel setup" aria-label="Workout options">
+      <div class="setup-grid">
+        <div>
+          <span class="field-label" id="level-label">Choose your level</span>
+          <div class="segmented" role="group" aria-labelledby="level-label" data-choice="level">
+            <button type="button" aria-pressed="true" data-value="Beginner">Beginner</button>
+            <button type="button" aria-pressed="false" data-value="Intermediate">Intermediate</button>
+            <button type="button" aria-pressed="false" data-value="Advanced">Advanced</button>
+          </div>
+        </div>
+        <div>
+          <span class="field-label" id="duration-label">How much time?</span>
+          <div class="segmented" role="group" aria-labelledby="duration-label" data-choice="duration">
+            <button type="button" aria-pressed="true" data-value="10">10 min</button>
+            <button type="button" aria-pressed="false" data-value="20">20 min</button>
+            <button type="button" aria-pressed="false" data-value="30">30 min</button>
+          </div>
+        </div>
+      </div>
+      <button class="generate" id="generate" type="button"><span aria-hidden="true">✦</span> Generate Workout</button>
+    </section>
+
+    <section class="panel workout" aria-live="polite" aria-labelledby="workout-title">
+      <div class="workout-head">
+        <div><h2 id="workout-title">Your mini workout</h2><p id="workout-subtitle">Beginner · 10 minutes · 5 exercises</p></div>
+        <span class="time-badge"><span aria-hidden="true">◷</span><span id="badge-time">10 min</span></span>
+      </div>
+      <div class="progress-wrap" aria-label="Workout progress">
+        <div class="progress-copy"><span id="progress-label">Your progress</span><span id="progress-count">0 of 5 done</span></div>
+        <div class="progress-track" role="progressbar" aria-label="Exercises completed" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+      <div class="exercise-list" id="exercise-list"></div>
+      <div class="finish" id="finish-message" role="status">Lovely work! You showed up for yourself today. 🌿</div>
+    </section>
+    <footer>Rest between sets, use a comfortable pace, and pause whenever you need to.</footer>
+  </main>
+
+  <script>
+    const exercises = [
+      { name: "March in place", note: "Warm up gently", group: "all", reps: "30 sec", rest: "Rest 20 sec" },
+      { name: "Chair squats", note: "Sit back, then stand tall", group: "all", reps: "10 reps", rest: "Rest 30 sec" },
+      { name: "Wall push-ups", note: "Hands on a wall, body in one line", group: "all", reps: "8 reps", rest: "Rest 30 sec" },
+      { name: "Glute bridges", note: "Press through your heels", group: "all", reps: "10 reps", rest: "Rest 30 sec" },
+      { name: "Standing knee lifts", note: "Lift one knee at a time", group: "all", reps: "10 each side", rest: "Rest 20 sec" },
+      { name: "Bird dogs", note: "Reach opposite arm and leg", group: "beginner", reps: "8 each side", rest: "Rest 30 sec" },
+      { name: "Calf raises", note: "Hold a chair if you like", group: "beginner", reps: "12 reps", rest: "Rest 20 sec" },
+      { name: "Step-back lunges", note: "Keep the movement small and steady", group: "intermediate", reps: "8 each side", rest: "Rest 35 sec" },
+      { name: "Incline push-ups", note: "Use a sturdy counter or bench", group: "intermediate", reps: "10 reps", rest: "Rest 35 sec" },
+      { name: "Dead bugs", note: "Keep your lower back comfortable", group: "intermediate", reps: "10 each side", rest: "Rest 30 sec" },
+      { name: "Fast feet", note: "Light, quick steps on the spot", group: "advanced", reps: "30 sec", rest: "Rest 30 sec" },
+      { name: "Squat to calf raise", note: "Stand tall at the top", group: "advanced", reps: "12 reps", rest: "Rest 40 sec" },
+      { name: "Mountain climbers", note: "Use a wall or bench to modify", group: "advanced", reps: "20 each side", rest: "Rest 40 sec" },
+      { name: "Reverse lunges", note: "Alternate sides with control", group: "advanced", reps: "10 each side", rest: "Rest 40 sec" },
+      { name: "Knee push-ups", note: "Keep shoulders relaxed", group: "advanced", reps: "8–10 reps", rest: "Rest 40 sec" },
+      { name: "Standing side leg lifts", note: "Keep your hips facing forward", group: "all", reps: "10 each side", rest: "Rest 25 sec" },
+      { name: "Dead bug heel taps", note: "Move slowly and breathe", group: "all", reps: "8 each side", rest: "Rest 25 sec" },
+      { name: "Easy step jacks", note: "Step out instead of jumping", group: "all", reps: "30 sec", rest: "Rest 20 sec" },
+      { name: "Standing chest opener", note: "Open your arms, breathe gently", group: "all", reps: "8 reps", rest: "Rest 20 sec" },
+      { name: "Seated or standing twists", note: "Turn gently from your upper body", group: "all", reps: "8 each side", rest: "Rest 20 sec" }
+    ];
+    const countByDuration = { 10: 5, 20: 6, 30: 8 };
+    let level = "Beginner";
+    let duration = 10;
+    let currentWorkout = [];
+    const list = document.getElementById("exercise-list");
+    const doneMessage = document.getElementById("finish-message");
+
+    document.querySelectorAll(".segmented").forEach(group => {
+      group.addEventListener("click", event => {
+        const button = event.target.closest("button[data-value]");
+        if (!button) return;
+        group.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+        if (group.dataset.choice === "level") level = button.dataset.value;
+        else duration = Number(button.dataset.value);
+      });
+    });
+
+    function pickWorkout() {
+      const levelKey = level.toLowerCase();
+      const eligible = exercises.filter(item => item.group === "all" || item.group === levelKey);
+      const chosen = [];
+      while (chosen.length < countByDuration[duration]) {
+        const remaining = eligible.filter(item => !chosen.includes(item));
+        chosen.push(remaining[Math.floor(Math.random() * remaining.length)]);
+      }
+      return chosen;
+    }
+
+    function renderWorkout() {
+      currentWorkout = pickWorkout();
+      const sets = level === "Beginner" ? 2 : 3;
+      list.innerHTML = currentWorkout.map((exercise, index) => `
+        <article class="exercise" data-index="${index}">
+          <label class="check" aria-label="Mark ${exercise.name} completed">
+            <input type="checkbox" aria-label="Mark ${exercise.name} completed" data-index="${index}" />
+            <span class="checkmark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="m3 8 3.2 3.2L13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </label>
+          <div class="exercise-main"><span class="exercise-name">${exercise.name}</span><span class="exercise-note">${exercise.note}</span></div>
+          <div class="exercise-meta"><span class="dose">${sets} sets · ${exercise.reps}</span><span class="rest">${exercise.rest}</span></div>
+        </article>`).join("");
+      document.getElementById("workout-title").textContent = `${level} mini workout`;
+      document.getElementById("workout-subtitle").textContent = `${level} · ${duration} minutes · ${currentWorkout.length} exercises`;
+      document.getElementById("badge-time").textContent = `${duration} min`;
+      document.querySelector(".progress-track").setAttribute("aria-valuemax", currentWorkout.length);
+      doneMessage.classList.remove("show");
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const checkboxes = [...list.querySelectorAll("input[type=checkbox]")];
+      const completed = checkboxes.filter(input => input.checked).length;
+      document.getElementById("progress-count").textContent = `${completed} of ${checkboxes.length} done`;
+      document.getElementById("progress-fill").style.width = `${checkboxes.length ? completed / checkboxes.length * 100 : 0}%`;
+      document.querySelector(".progress-track").setAttribute("aria-valuenow", completed);
+      checkboxes.forEach(input => input.closest(".exercise").classList.toggle("done", input.checked));
+      doneMessage.classList.toggle("show", checkboxes.length > 0 && completed === checkboxes.length);
+    }
+
+    document.getElementById("generate").addEventListener("click", renderWorkout);
+    list.addEventListener("change", updateProgress);
+    renderWorkout();
+  </script>
+</body>
+</html>
